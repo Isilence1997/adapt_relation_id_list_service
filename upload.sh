@@ -8,7 +8,7 @@ env=test              #参考下图如果获取该值
 app=video_app_short_video
 server=adapt_relation_id_list_service
 test=interface_test
-instances=cls-rka7p1vd-7272ecd782294e4a4d82720c86497f0c-8
+instances=cls-rka7p1vd-aad7ef52e4c7d33c4bb7b1859bc4ee95-0
 user=isaacmxu             #自己的rtx名字
 mkdir bin
 mkdir script
