@@ -1,6 +1,8 @@
 package main
 
 import (
+	"timeline_id_list/config"
+
 	_ "go.uber.org/automaxprocs"
 
 	_ "git.code.oa.com/trpc-go/trpc-config-tconf"
@@ -12,6 +14,7 @@ import (
 	_ "git.code.oa.com/trpc-go/trpc-naming-polaris"
 	_ "git.code.oa.com/trpc-go/trpc-opentracing-tjg"
 	_ "git.code.oa.com/trpc-go/trpc-selector-cl5"
+	"git.code.oa.com/video_app_short_video/trpc_go_commonlib/atta-report"
 
 	"git.code.oa.com/trpc-go/trpc-go/log"
 
@@ -19,12 +22,17 @@ import (
 	pb "git.code.oa.com/trpcprotocol/component_plat/video_timeline_timeline_id_list"
 )
 
+func initService() {
+	config.InitServiceConfig()
+	atta.DefaultInit()
+}
+
 type iDListServiceServiceImpl struct{}
 
 func main() {
 
 	s := trpc.NewServer()
-
+	initService()
 	pb.RegisterIDListServiceService(s, &iDListServiceServiceImpl{})
 
 	if err := s.Serve(); err != nil {
