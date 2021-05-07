@@ -6,7 +6,7 @@ const (
 	// EmptyInputID 请求入参vuid为空
 	EmptyInputID = -8820008
 	// RPCFuncCallError rpc调用失败
-	RPCFuncCallError = -8820009
+	SubsRelRPCFuncCallError = -8820009
 	// ReturnCodeError 返回码不等于0
-	ReturnCodeError = -8820010
+	SubsRelReturnCodeError = -8820010
 )

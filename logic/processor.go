@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"timeline_id_list/common"
+	"timeline_id_list/config"
 
 	//第三方包
 	"git.code.oa.com/trpc-go/trpc-go/client"
@@ -18,7 +19,8 @@ import (
 	"git.code.oa.com/vlib/go/video_common_api/componenthead"
 )
 
-func GetIDList(ctx context.Context, inputParam *pb.GetRelationIDListReq,
+// GetIDListSubsRelHelper 拉取订阅关系链
+func GetIDListSubsRelHelper(ctx context.Context, inputParam *pb.GetRelationIDListReq,
 	outputParam *pb.GetRelationIDListRsp) error {
 	// 目前订阅最多订阅500个用户
 	if inputParam.PageInfo.Offset > common.MaxSubNum {
@@ -53,13 +55,13 @@ func GetIDList(ctx context.Context, inputParam *pb.GetRelationIDListReq,
 	log.Debugf("GetIDList rsp=%+v", rsp)
 	// 判断返回error是否为nil
 	if err != nil {
-		err = errs.New(common.RPCFuncCallError, err.Error())
+		err = errs.New(common.SubsRelRPCFuncCallError, err.Error())
 		return err
 	}
 	// 判断RetCode是否为0
 	if rsp != nil || rsp.RetCode != 0 {
 		errMsg := fmt.Sprintf("req[%v] rsp[%v] code[%v]", req, rsp, rsp.RetCode)
-		err = errs.New(common.ReturnCodeError, errMsg)
+		err = errs.New(common.SubsRelReturnCodeError, errMsg)
 		return err
 	}
 	// 从拉取的 UserInfos array里面提取vcuids
@@ -80,6 +82,19 @@ func GetIDList(ctx context.Context, inputParam *pb.GetRelationIDListReq,
 	outputParam.PageInfo = &pb.RelationIDListPageInfo{
 		Offset:   inputParam.PageInfo.Offset + inputParam.PageInfo.PageSize,
 		PageSize: inputParam.PageInfo.PageSize,
+	}
+	return nil
+}
+
+// GetIDList 拉取关系和
+func GetIDList(ctx context.Context, inputParam *pb.GetRelationIDListReq,
+	outputParam *pb.GetRelationIDListRsp) error {
+	config := config.GetConfig()
+	var err error
+	switch inputParam.Scene {
+	case config.BizScene.SubsRelScene:
+		err = GetIDListSubsRelHelper(ctx, inputParam, outputParam)
+		return err
 	}
 	return nil
 }

@@ -1,0 +1,1 @@
+go test ./logic/... --covermode=count -count=1 -coverprofile=cover.out -v -gcflags=all=-l
