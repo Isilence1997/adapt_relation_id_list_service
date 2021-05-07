@@ -17,8 +17,10 @@ require (
 	git.code.oa.com/trpcprotocol/component_plat/common_comm v1.1.10
 	git.code.oa.com/trpcprotocol/component_plat/video_timeline_timeline_data v1.1.13
 	git.code.oa.com/trpcprotocol/component_plat/video_timeline_timeline_id_list v1.1.6
+	git.code.oa.com/trpcprotocol/component_plat/video_timeline_timeline_rpc v1.1.27
 	git.code.oa.com/video_app_short_video/trpc_go_commonlib v0.0.0-20210414121907-cb9ebeb71f16
 	git.code.oa.com/vlib/go/video_common_api v1.3.2
+	github.com/agiledragon/gomonkey v2.0.2+incompatible
 	github.com/golang/mock v1.4.4
 	github.com/stretchr/testify v1.6.1
 	go.uber.org/automaxprocs v1.4.0

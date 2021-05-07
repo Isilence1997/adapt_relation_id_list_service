@@ -21,15 +21,6 @@ import (
 // GetIDListSubsRelHelper 拉取订阅关系链
 func GetIDListSubsRelHelper(ctx context.Context, inputParam *pb.GetRelationIDListReq,
 	outputParam *pb.GetRelationIDListRsp) error {
-	// 目前订阅最多订阅500个用户
-	if inputParam.PageInfo.Offset > common.MaxSubNum {
-		outputParam.PageInfo = &pb.RelationIDListPageInfo{
-			Offset:   inputParam.PageInfo.Offset,
-			PageSize: inputParam.PageInfo.PageSize,
-		}
-		outputParam.HasNextPage = false
-		return nil
-	}
 	// set componentHead
 	componentHead := &common_comm.ComponentReqHead{
 		AppInfo: &common_comm.AppInfo{
@@ -42,23 +33,27 @@ func GetIDListSubsRelHelper(ctx context.Context, inputParam *pb.GetRelationIDLis
 		log.Fatal(err)
 	}
 	proxy := relationship_read.NewUserRelationShipReadClientProxy(
-		client.WithServiceName("trpc.account_service.trpc_user_relationship_read.UserRelationshipRead"))
+		client.WithProtocol("trpc"),
+		client.WithNetwork("tcp4"),
+		client.WithTarget(config.GetConfig().UserRelationshipService.ReadServiceName),
+		client.WithNamespace(config.GetConfig().UserRelationshipService.ReadServiceNamespace),
+		client.WithDisableServiceRouter())
 	req := &relationship_read.GetFollowListReq{
 		Id:                inputParam.EntityId,
 		Start:             inputParam.PageInfo.Offset,   // 拉取订阅关系列表的起始位置
 		Limit:             inputParam.PageInfo.PageSize, // 一次拉取订阅链的最大限度
 		NeedUserExtraInfo: false,                        // 是否需要额外信息
 	}
-	log.Debugf("GetIDList req=%+v", req)
+	log.Debugf("GetIDListSubsRelHelper req=%+v", req)
 	rsp, err := proxy.GetFollowList(ctx, req)
-	log.Debugf("GetIDList rsp=%+v", rsp)
+	log.Debugf("GetIDListSubsRelHelper rsp=%+v", rsp)
 	// 判断返回error是否为nil
 	if err != nil {
 		err = errs.New(common.SubsRelRPCFuncCallError, err.Error())
 		return err
 	}
 	// 判断RetCode是否为0
-	if rsp != nil || rsp.RetCode != 0 {
+	if rsp != nil && rsp.RetCode != 0 {
 		errMsg := fmt.Sprintf("req[%v] rsp[%v] code[%v]", req, rsp, rsp.RetCode)
 		err = errs.New(common.SubsRelReturnCodeError, errMsg)
 		return err
@@ -89,11 +84,10 @@ func GetIDListSubsRelHelper(ctx context.Context, inputParam *pb.GetRelationIDLis
 func GetIDList(ctx context.Context, inputParam *pb.GetRelationIDListReq,
 	outputParam *pb.GetRelationIDListRsp) error {
 	config := config.GetConfig()
-	var err error
+	fmt.Printf("config=[%+v]", config)
 	switch inputParam.Scene {
 	case config.BizScene.SubsRelScene:
-		err = GetIDListSubsRelHelper(ctx, inputParam, outputParam)
-		return err
+		return GetIDListSubsRelHelper(ctx, inputParam, outputParam)
 	}
 	return nil
 }

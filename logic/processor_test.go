@@ -1,0 +1,163 @@
+package logic
+
+import (
+	"context"
+	"testing"
+	"timeline_id_list/config"
+
+	"git.code.oa.com/trpc-go/trpc-go/client"
+	"git.code.oa.com/trpc-go/trpc-go/errs"
+	relationship_read "git.code.oa.com/trpcprotocol/component_plat/account_service_user_relationship_read"
+	"git.code.oa.com/trpcprotocol/component_plat/common_comm"
+	pb "git.code.oa.com/trpcprotocol/component_plat/video_timeline_timeline_id_list"
+	"git.code.oa.com/vlib/go/video_common_api/componenthead"
+	"github.com/agiledragon/gomonkey"
+	"github.com/golang/mock/gomock"
+)
+
+func TestGetIDList(t *testing.T) {
+	p := gomonkey.ApplyFunc(config.GetConfig, func() config.ServiceConfig {
+		return config.ServiceConfig{
+			UserRelationshipService: config.RelationshipService{
+				ReadServiceName:      "polaris://trpc.account_service.trpc_user_relationship_read.UserRelationshipRead",
+				ReadServiceNamespace: "Development",
+			},
+			BizScene: struct {
+				SubsRelScene    string `json:"subs_rel_scene" yaml:"subs_rel_scene"`
+				FollowRelScene  string `json:"follow_rel_scene" yaml:"follow_rel_scene"`
+				SubsFansScene   string `json:"subs_fans_scene" yaml:"subs_fans_scene"`
+				FollowFansScene string `json:"follow_fans_scene" yaml:"follow_fans_scene"`
+			}{
+				SubsRelScene:    "subs_rel",
+				FollowRelScene:  "follow_rel",
+				SubsFansScene:   "subs_fans",
+				FollowFansScene: "follow_fans",
+			},
+		}
+	})
+	defer p.Reset()
+
+  // mock componenthead.SetComponentReqHead
+	p1 := gomonkey.ApplyFunc(componenthead.SetComponentReqHead,
+		func(ctx context.Context, componentHead *common_comm.ComponentReqHead) error {
+			return nil
+		})
+	defer p1.Reset()
+
+	// mock RPC Call
+	mockCtr := gomock.NewController(t)
+	defer mockCtr.Finish()
+	relationShipReadMock := relationship_read.NewMockUserRelationShipReadClientProxy(mockCtr)
+	relationShipReadMock.EXPECT().GetFollowList(gomock.Any(), gomock.Any()).DoAndReturn(
+		func(ctx context.Context, req *relationship_read.GetFollowListReq,
+			opts ...client.Option) (rsp *relationship_read.GetFollowListRsp, err error) {
+			if req.Id == "Vuid1" && req.Start == 0 {
+				return &relationship_read.GetFollowListRsp{
+					RetCode:     0,
+					HasNextPage: false,
+					UserInfos: []*relationship_read.UserInfo{
+						{
+							UserId:     "Vcuid1",
+							DetailInfo: map[string]string{},
+						},
+
+						{
+							UserId:     "Vcuid2",
+							DetailInfo: map[string]string{},
+						},
+
+						{
+							UserId:     "Vcuid3",
+							DetailInfo: map[string]string{},
+						},
+					},
+				}, nil
+			} else if req.Id == "Vuid2" {
+				return &relationship_read.GetFollowListRsp{
+					RetCode:     -1,
+					HasNextPage: false,
+					UserInfos: []*relationship_read.UserInfo{},
+				}, nil
+			}
+			return &relationship_read.GetFollowListRsp{
+				RetCode:     0,
+				HasNextPage: false,
+				UserInfos: []*relationship_read.UserInfo{},
+			}, errs.New(-1, "err_msg")
+		}).AnyTimes()
+  
+	p2 := gomonkey.ApplyFunc(relationship_read.NewUserRelationShipReadClientProxy,
+		func(opts ...client.Option) relationship_read.UserRelationShipReadClientProxy {
+			return relationShipReadMock
+		})
+	defer p2.Reset()
+
+	type args struct {
+		ctx         context.Context
+		inputParam  *pb.GetRelationIDListReq
+		outputParam *pb.GetRelationIDListRsp
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{
+			name: "NormalCase",
+			args: args{
+				ctx: context.Background(),
+				inputParam: &pb.GetRelationIDListReq{
+					EntityId: "Vuid1",
+					PageInfo: &pb.RelationIDListPageInfo{
+						Offset:   0,
+						PageSize: 100,
+					},
+					Scene: "subs_rel",
+				},
+				outputParam: &pb.GetRelationIDListRsp{},
+			},
+			wantErr: false,
+		},
+
+		{
+			name: "AbnormalCase",
+			args: args{
+				ctx: context.Background(),
+				inputParam: &pb.GetRelationIDListReq{
+					EntityId: "Vuid2",
+					PageInfo: &pb.RelationIDListPageInfo{
+						Offset:   0,
+						PageSize: 100,
+					},
+					Scene: "subs_rel",
+				},
+				outputParam: &pb.GetRelationIDListRsp{},
+			},
+			wantErr: true,
+		},
+
+		{
+			name: "AbnormalCase2",
+			args: args{
+				ctx: context.Background(),
+				inputParam: &pb.GetRelationIDListReq{
+					EntityId: "Vuid3",
+					PageInfo: &pb.RelationIDListPageInfo{
+						Offset:   0,
+						PageSize: 100,
+					},
+					Scene: "subs_rel",
+				},
+				outputParam: &pb.GetRelationIDListRsp{},
+			},
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := GetIDList(tt.args.ctx, tt.args.inputParam, tt.args.outputParam); (err != nil) != tt.wantErr {
+				t.Errorf("GetIDList() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
