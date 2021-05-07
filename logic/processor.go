@@ -14,7 +14,6 @@ import (
 	relationship_read "git.code.oa.com/trpcprotocol/component_plat/account_service_user_relationship_read"
 	"git.code.oa.com/trpcprotocol/component_plat/common_comm"
 	"git.code.oa.com/trpcprotocol/component_plat/video_timeline_timeline_data"
-	"git.code.oa.com/trpcprotocol/component_plat/video_timeline_timeline_id_list"
 	pb "git.code.oa.com/trpcprotocol/component_plat/video_timeline_timeline_id_list"
 	"git.code.oa.com/vlib/go/video_common_api/componenthead"
 )
@@ -66,7 +65,7 @@ func GetIDListSubsRelHelper(ctx context.Context, inputParam *pb.GetRelationIDLis
 	}
 	// 从拉取的 UserInfos array里面提取vcuids
 	for _, usrInfo := range rsp.UserInfos {
-		item := &video_timeline_timeline_id_list.Item{
+		item := &pb.Item{
 			Id:     usrInfo.UserId,
 			IdType: video_timeline_timeline_data.IdType_VCUID,
 		}
