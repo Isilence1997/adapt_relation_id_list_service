@@ -28,7 +28,7 @@ func (s *iDListServiceServiceImpl) GetRelationIDList(ctx context.Context,
 	// 检查入参数是否合法
 	if req.EntityId == "" {
 		errStr := fmt.Sprintf("GetRelationIDList with empty req vuid, req=[%+v], rsp=[%+v]", req, rsp)
-		err := errs.New(common.EmptyInputID, errStr)
+		err := errs.New(common.EmptyInputIDError, errStr)
 		log.Error(err)
 		atta.AttaLogTrpcCtxWithVuid(ctx, fmt.Sprintf("GetRelationIDList with empty req vuid, req=[%+v], rsp=[%+v]",
 			req, rsp), "GetRelationIDList failed", req.EntityId)
@@ -43,6 +43,8 @@ func (s *iDListServiceServiceImpl) GetRelationIDList(ctx context.Context,
 		return err
 	}
 	log.Debugf("rsp[%+v]", rsp)
+	atta.AttaLogTrpcCtxWithVuid(ctx, fmt.Sprintf("GetRelationIDList req=[%+v], rsp=[%+v]",
+			req, rsp), "GetRelationIDList succeed", req.EntityId)
 	return nil
 }
 
