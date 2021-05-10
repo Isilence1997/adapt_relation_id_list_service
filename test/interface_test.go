@@ -78,3 +78,48 @@ func TestInterfaceCaseSubsRel(t *testing.T) {
 		}
 	}
 }
+
+
+func TestInterfaceCaseSubsFans(t *testing.T) {
+	t.Logf("%+v", trpc.GlobalConfig())
+	testing.Init()
+	if !flag.Parsed() {
+		flag.Parse()
+	}
+	if len(trpc.GlobalConfig().Server.Service) == 0 {
+		panic("global config error")
+	}
+
+	target := fmt.Sprintf("ip://%s:%d", trpc.GlobalConfig().Server.Service[0].IP,
+		trpc.GlobalConfig().Server.Service[0].Port)
+	option = append(option, client.WithTarget(target))
+	t.Logf("targetStr: %s", target)
+
+	proxy := pb.NewIDListServiceClientProxy(option...)
+	req := &pb.GetRelationIDListReq{
+		EntityId: "9000026631",
+		Scene:    "subs_fans",
+		PageInfo: &pb.RelationIDListPageInfo{
+			Offset: 0,
+			PageSize: 5,
+		},
+	}
+	rsp, err := proxy.GetRelationIDList(context.Background(), req)
+	if err != nil {
+		t.Errorf("error:%v", err)
+		return
+	}
+
+	t.Logf("rsp[%v]", rsp)
+	if rsp != nil {
+		for rsp.HasNextPage {
+			req.PageInfo = rsp.PageInfo
+			rsp, err = proxy.GetRelationIDList(context.Background(), req)
+			if err != nil {
+				t.Errorf("error:%v", err)
+			}
+
+			t.Logf("rsp[%+v], nums[%d],hasNextPage[%v]", rsp, len(rsp.Items), rsp.HasNextPage)
+		}
+	}
+}
