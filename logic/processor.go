@@ -8,6 +8,7 @@ import (
 	"timeline_id_list/config"
 
 	//第三方包
+
 	"git.code.oa.com/trpc-go/trpc-go/client"
 	"git.code.oa.com/trpc-go/trpc-go/errs"
 	"git.code.oa.com/trpc-go/trpc-go/log"
@@ -80,6 +81,68 @@ func GetIDListSubsRelHelper(ctx context.Context, inputParam *pb.GetRelationIDLis
 	return nil
 }
 
+// GetIDListSubsFansHelper 拉取订阅粉丝链
+func GetIDListSubsFansHelper(ctx context.Context, inputParam *pb.GetRelationIDListReq,
+	outputParam *pb.GetRelationIDListRsp) error {
+	// set componentHead
+	componentHead := &common_comm.ComponentReqHead{
+		AppInfo: &common_comm.AppInfo{
+			Appid:  "tencent_video.mobile_client.user_relation_sub",
+			Appkey: "567da9dc-2cb8-436e-9322-1ca3302e331e",
+		},
+	}
+	err := componenthead.SetComponentReqHead(ctx, componentHead)
+	if err != nil {
+		log.Fatal(err)
+	}
+	proxy := relationship_read.NewUserRelationShipReadClientProxy(client.WithProtocol("trpc"),
+		client.WithNetwork("tcp4"),
+		client.WithTarget(config.GetConfig().UserRelationshipService.ReadServiceName),
+		client.WithNamespace(config.GetConfig().UserRelationshipService.ReadServiceNamespace),
+		client.WithDisableServiceRouter())
+	req := &relationship_read.GetFansListReq{
+		Id:                inputParam.EntityId,          // 请求用的vcuid
+		Start:             inputParam.PageInfo.Offset,   // 拉取订阅粉丝关系列表的起始位置
+		Limit:             inputParam.PageInfo.PageSize, // 一次拉取订阅粉丝链的最大限度
+		NeedUserExtraInfo: false,                        // 是否需要额外信息
+	}
+	log.Debugf("%p", proxy)
+	log.Debugf("GetIDListSubsFansHelper req=%+v", req)
+	rsp, err := proxy.GetFansList(ctx, req)
+	log.Debugf("GetIDListSubsFansHelper rsp=%+v", rsp)
+	// 判断返回error是否为nil
+	if err != nil {
+		err = errs.New(common.SubsFansRPCFuncCallError, err.Error())
+		return err
+	}
+	// 判断RetCode是否为0
+	if rsp != nil && rsp.RetCode != 0 {
+		errMsg := fmt.Sprintf("req[%v] rsp[%v] code[%v]", req, rsp, rsp.RetCode)
+		err = errs.New(common.SubsFansReturnCodeError, errMsg)
+		return err
+	}
+	// 从拉取的 UserInfos array里面提取vcuids
+	for _, usrInfo := range rsp.UserInfos {
+		item := &pb.Item{
+			Id:     usrInfo.UserId,
+			IdType: video_timeline_timeline_data.IdType_VUID,
+		}
+		outputParam.Items = append(outputParam.Items, item)
+	}
+	// 返回是否有下一页
+	if !rsp.HasNextPage || len(rsp.UserInfos) == 0 {
+		outputParam.HasNextPage = false
+	} else {
+		outputParam.HasNextPage = true
+	}
+	// 返回下一次请求的PageInfo
+	outputParam.PageInfo = &pb.RelationIDListPageInfo{
+		Offset:   inputParam.PageInfo.Offset + inputParam.PageInfo.PageSize,
+		PageSize: inputParam.PageInfo.PageSize,
+	}
+	return nil
+}
+
 // GetIDList 拉取关系和
 func GetIDList(ctx context.Context, inputParam *pb.GetRelationIDListReq,
 	outputParam *pb.GetRelationIDListRsp) error {
@@ -88,6 +151,8 @@ func GetIDList(ctx context.Context, inputParam *pb.GetRelationIDListReq,
 	switch inputParam.Scene {
 	case config.BizScene.SubsRelScene:
 		return GetIDListSubsRelHelper(ctx, inputParam, outputParam)
+	case config.BizScene.SubsFansScene:
+		return GetIDListSubsFansHelper(ctx, inputParam, outputParam)
 	}
 	return nil
 }

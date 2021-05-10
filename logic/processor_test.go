@@ -37,7 +37,7 @@ func TestGetIDList(t *testing.T) {
 	})
 	defer p.Reset()
 
-  // mock componenthead.SetComponentReqHead
+	// mock componenthead.SetComponentReqHead
 	p1 := gomonkey.ApplyFunc(componenthead.SetComponentReqHead,
 		func(ctx context.Context, componentHead *common_comm.ComponentReqHead) error {
 			return nil
@@ -76,16 +76,54 @@ func TestGetIDList(t *testing.T) {
 				return &relationship_read.GetFollowListRsp{
 					RetCode:     -1,
 					HasNextPage: false,
-					UserInfos: []*relationship_read.UserInfo{},
+					UserInfos:   []*relationship_read.UserInfo{},
 				}, nil
 			}
 			return &relationship_read.GetFollowListRsp{
 				RetCode:     0,
 				HasNextPage: false,
-				UserInfos: []*relationship_read.UserInfo{},
+				UserInfos:   []*relationship_read.UserInfo{},
 			}, errs.New(-1, "err_msg")
 		}).AnyTimes()
-  
+
+	relationShipReadMock.EXPECT().GetFansList(gomock.Any(), gomock.Any()).DoAndReturn(
+		func(ctx context.Context, req *relationship_read.GetFansListReq,
+			opts ...client.Option) (rsp *relationship_read.GetFansListRsp, err error) {
+			if req.Id == "Vcuid1" && req.Start == 0 {
+				return &relationship_read.GetFansListRsp{
+					RetCode:     0,
+					HasNextPage: false,
+					UserInfos:   []*relationship_read.UserInfo{
+						{
+							UserId:     "Vuid1",
+							DetailInfo: map[string]string{},
+						},
+
+						{
+							UserId:     "Vuid2",
+							DetailInfo: map[string]string{},
+						},
+
+						{
+							UserId:     "Vuid3",
+							DetailInfo: map[string]string{},
+						},
+					},
+				}, nil
+			} else if req.Id == "Vcuid2" {
+				return &relationship_read.GetFansListRsp{
+					RetCode:     -1,
+					HasNextPage: false,
+					UserInfos:   []*relationship_read.UserInfo{},
+				}, nil
+			}
+			return &relationship_read.GetFansListRsp{
+				RetCode:     0,
+				HasNextPage: false,
+				UserInfos:   []*relationship_read.UserInfo{},
+			}, errs.New(-1, "err_msg")
+		}).AnyTimes()
+
 	p2 := gomonkey.ApplyFunc(relationship_read.NewUserRelationShipReadClientProxy,
 		func(opts ...client.Option) relationship_read.UserRelationShipReadClientProxy {
 			return relationShipReadMock
@@ -142,6 +180,57 @@ func TestGetIDList(t *testing.T) {
 				ctx: context.Background(),
 				inputParam: &pb.GetRelationIDListReq{
 					EntityId: "Vuid3",
+					PageInfo: &pb.RelationIDListPageInfo{
+						Offset:   0,
+						PageSize: 100,
+					},
+					Scene: "subs_rel",
+				},
+				outputParam: &pb.GetRelationIDListRsp{},
+			},
+			wantErr: true,
+		},
+
+		{
+			name: "NormalCase1",
+			args: args{
+				ctx: context.Background(),
+				inputParam: &pb.GetRelationIDListReq{
+					EntityId: "Vcuid1",
+					PageInfo: &pb.RelationIDListPageInfo{
+						Offset:   0,
+						PageSize: 100,
+					},
+					Scene: "subs_fans",
+				},
+				outputParam: &pb.GetRelationIDListRsp{},
+			},
+			wantErr: false,
+		},
+
+		{
+			name: "AbnormalCase3",
+			args: args{
+				ctx: context.Background(),
+				inputParam: &pb.GetRelationIDListReq{
+					EntityId: "Vcuid2",
+					PageInfo: &pb.RelationIDListPageInfo{
+						Offset:   0,
+						PageSize: 100,
+					},
+					Scene: "subs_rel",
+				},
+				outputParam: &pb.GetRelationIDListRsp{},
+			},
+			wantErr: true,
+		},
+
+		{
+			name: "AbnormalCase4",
+			args: args{
+				ctx: context.Background(),
+				inputParam: &pb.GetRelationIDListReq{
+					EntityId: "Vcuid3",
 					PageInfo: &pb.RelationIDListPageInfo{
 						Offset:   0,
 						PageSize: 100,

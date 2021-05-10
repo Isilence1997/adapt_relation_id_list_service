@@ -9,4 +9,8 @@ const (
 	SubsRelRPCFuncCallError = -8820009
 	// ReturnCodeError 返回码不等于0
 	SubsRelReturnCodeError = -8820010
+	// SubsFansRPCFuncCallError rpc调用失败
+	SubsFansRPCFuncCallError = -8820011
+	// SubsFansReturnCodeError 返回码不等于0
+	SubsFansReturnCodeError = -8820012
 )
