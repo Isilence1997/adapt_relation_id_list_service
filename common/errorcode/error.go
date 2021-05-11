@@ -1,7 +1,7 @@
-package common
+package errorcode
 
 const (
-	//ParamsInvalidError 请求参数非法
+	// ParamsInvalidError 请求参数非法
 	ParamsInvalidError = -8820007
 	// EmptyInputIDError 请求入参vuid为空
 	EmptyInputIDError = -8820008
@@ -13,4 +13,6 @@ const (
 	SubsFansRPCFuncCallError = -8820011
 	// SubsFansReturnCodeError 返回码不等于0
 	SubsFansReturnCodeError = -8820012
+	// UnknownParamError 参数未知错误
+	UnknownParamError = -8820013
 )
