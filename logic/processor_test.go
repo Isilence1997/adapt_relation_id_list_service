@@ -10,6 +10,8 @@ import (
 	relationship_read "git.code.oa.com/trpcprotocol/component_plat/account_service_user_relationship_read"
 	"git.code.oa.com/trpcprotocol/component_plat/common_comm"
 	pb "git.code.oa.com/trpcprotocol/component_plat/video_timeline_timeline_id_list"
+	cFollowInnerJce "git.code.oa.com/video_app_short_video/short_video_trpc_proto/ugc_follow_inner"
+	cFollowInnerJceMock "git.code.oa.com/video_app_short_video/short_video_trpc_proto/ugc_follow_inner/mock_proxy"
 	"git.code.oa.com/vlib/go/video_common_api/componenthead"
 	"github.com/agiledragon/gomonkey"
 	"github.com/golang/mock/gomock"
@@ -93,7 +95,7 @@ func TestGetIDList(t *testing.T) {
 				return &relationship_read.GetFansListRsp{
 					RetCode:     0,
 					HasNextPage: false,
-					UserInfos:   []*relationship_read.UserInfo{
+					UserInfos: []*relationship_read.UserInfo{
 						{
 							UserId:     "Vuid1",
 							DetailInfo: map[string]string{},
@@ -129,6 +131,36 @@ func TestGetIDList(t *testing.T) {
 			return relationShipReadMock
 		})
 	defer p2.Reset()
+
+	// mock RPC Call
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	UgcFollowInnerMock := cFollowInnerJceMock.NewMockUgcFollowInnerServiceProxy(mockCtrl)
+	UgcFollowInnerMock.EXPECT().QueryFollowVpps(gomock.Any(), gomock.Any(), gomock.Any()).DoAndReturn(
+		func(ctx context.Context, req *cFollowInnerJce.QueryFollowVppsReq,
+			opts ...client.Option) (*cFollowInnerJce.QueryFollowVppsRsp, error) {
+			if req.User.UserId == 1 {
+				return &cFollowInnerJce.QueryFollowVppsRsp{
+					HasNextPage: false,
+					PageContext: "",
+					VecVppIds: []cFollowInnerJce.User{
+						{
+							UserId: 123,
+						},
+						{
+							UserId: 234,
+						},
+					},
+				}, nil
+			}
+			return &cFollowInnerJce.QueryFollowVppsRsp{}, nil
+		})
+
+	p3 := gomonkey.ApplyFunc(cFollowInnerJce.NewUgcFollowInnerServiceProxy,
+		func(name string) cFollowInnerJce.UgcFollowInnerServiceProxy {
+			return UgcFollowInnerMock
+		})
+	defer p3.Reset()
 
 	type args struct {
 		ctx         context.Context
@@ -240,6 +272,26 @@ func TestGetIDList(t *testing.T) {
 				outputParam: &pb.GetRelationIDListRsp{},
 			},
 			wantErr: true,
+		},
+
+		{
+			name: "NormalCaseFollow_rel",
+			args: args{
+				ctx: context.Background(),
+				inputParam: &pb.GetRelationIDListReq{
+					EntityId: "1",
+					PageInfo: &pb.RelationIDListPageInfo{
+						Offset:   0,
+						PageSize: 100,
+						PageContext: map[string]string{
+							"page_context": "",
+						},
+					},
+					Scene: "follow_rel",
+				},
+				outputParam: &pb.GetRelationIDListRsp{},
+			},
+			wantErr: false,
 		},
 	}
 	for _, tt := range tests {

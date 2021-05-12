@@ -7,6 +7,7 @@ import (
 	"timeline_id_list/common/errorcode"
 	"timeline_id_list/config"
 	"timeline_id_list/logic/subs"
+	"timeline_id_list/logic/follow"
 
 	//第三方包
 
@@ -24,6 +25,8 @@ func GetIDList(ctx context.Context, inputParam *pb.GetRelationIDListReq,
 		return subs.GetIDListSubsRelHelper(ctx, inputParam, outputParam)
 	case config.BizScene.SubsFansScene:
 		return subs.GetIDListSubsFansHelper(ctx, inputParam, outputParam)
+	case config.BizScene.FollowRelScene:
+		return follow.GetIDListFollowRelHelper(ctx, inputParam, outputParam)
 	default:
 		return errs.New(errorcode.UnknownParamError, "UnknownParamError")
 	}

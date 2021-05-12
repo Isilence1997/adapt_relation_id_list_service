@@ -82,6 +82,6 @@ func GetIDListSubsRelHelper(ctx context.Context, inputParam *pb.GetRelationIDLis
 		err = errs.New(errorcode.SubsRelReturnCodeError, errMsg)
 		return err
 	}
-	PackUpRelRsp(rsp, inputParam, outputParam)
+  PackUpRelRsp(rsp, inputParam, outputParam)
 	return nil
 }

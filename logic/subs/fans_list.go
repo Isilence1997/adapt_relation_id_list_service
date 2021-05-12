@@ -19,7 +19,7 @@ import (
 	"git.code.oa.com/vlib/go/video_common_api/componenthead"
 )
 
-// PackUpRsp 装配粉丝链回包
+// PackUpFansRsp 装配粉丝链回包
 func PackUpFansRsp(rsp *relationship_read.GetFansListRsp,
 	inputParam *pb.GetRelationIDListReq, outputParam *pb.GetRelationIDListRsp) {
 	// 从拉取的 UserInfos array里面提取vcuids

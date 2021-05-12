@@ -15,4 +15,8 @@ const (
 	SubsFansReturnCodeError = -8820012
 	// UnknownParamError 参数未知错误
 	UnknownParamError = -8820013
+	// ParseVuidError 解析vuid失败
+	ParseVuidError = -8820014
+	// QueryFollowVppsError 调用QueryFollowVpps失败
+	QueryFollowVppsError = -8820015
 )
