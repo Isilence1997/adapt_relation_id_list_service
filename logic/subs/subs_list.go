@@ -19,6 +19,30 @@ import (
 	"git.code.oa.com/vlib/go/video_common_api/componenthead"
 )
 
+// PackUpRelRsp 装配关系链回包
+func PackUpRelRsp(rsp *relationship_read.GetFollowListRsp,
+	inputParam *pb.GetRelationIDListReq, outputParam *pb.GetRelationIDListRsp) {
+	// 从拉取的 UserInfos array里面提取vcuids
+	for _, usrInfo := range rsp.UserInfos {
+		item := &pb.Item{
+			Id:     usrInfo.UserId,
+			IdType: video_timeline_timeline_data.IdType_VCUID,
+		}
+		outputParam.Items = append(outputParam.Items, item)
+	}
+	// 返回是否有下一页
+	if !rsp.HasNextPage || len(rsp.UserInfos) == 0 {
+		outputParam.HasNextPage = false
+	} else {
+		outputParam.HasNextPage = true
+	}
+	// 返回下一次请求的PageInfo
+	outputParam.PageInfo = &pb.RelationIDListPageInfo{
+		Offset:   inputParam.PageInfo.Offset + inputParam.PageInfo.PageSize,
+		PageSize: inputParam.PageInfo.PageSize,
+	}
+}
+
 // GetIDListSubsRelHelper 拉取订阅关系链
 func GetIDListSubsRelHelper(ctx context.Context, inputParam *pb.GetRelationIDListReq,
 	outputParam *pb.GetRelationIDListRsp) error {
@@ -58,24 +82,6 @@ func GetIDListSubsRelHelper(ctx context.Context, inputParam *pb.GetRelationIDLis
 		err = errs.New(errorcode.SubsRelReturnCodeError, errMsg)
 		return err
 	}
-	// 从拉取的 UserInfos array里面提取vcuids
-	for _, usrInfo := range rsp.UserInfos {
-		item := &pb.Item{
-			Id:     usrInfo.UserId,
-			IdType: video_timeline_timeline_data.IdType_VCUID,
-		}
-		outputParam.Items = append(outputParam.Items, item)
-	}
-	// 返回是否有下一页
-	if !rsp.HasNextPage || len(rsp.UserInfos) == 0 {
-		outputParam.HasNextPage = false
-	} else {
-		outputParam.HasNextPage = true
-	}
-	// 返回下一次请求的PageInfo
-	outputParam.PageInfo = &pb.RelationIDListPageInfo{
-		Offset:   inputParam.PageInfo.Offset + inputParam.PageInfo.PageSize,
-		PageSize: inputParam.PageInfo.PageSize,
-	}
+	PackUpRelRsp(rsp, inputParam, outputParam)
 	return nil
 }
