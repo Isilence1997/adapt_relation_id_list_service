@@ -3,6 +3,7 @@ module timeline_id_list
 go 1.12
 
 require (
+	git.code.oa.com/trpc-go/trpc-codec/videopacket v0.1.0
 	git.code.oa.com/trpc-go/trpc-config-tconf v0.1.8
 	git.code.oa.com/trpc-go/trpc-filter/debuglog v0.1.3
 	git.code.oa.com/trpc-go/trpc-filter/recovery v0.1.2
