@@ -9,6 +9,7 @@ import (
 	"timeline_id_list/config"
 
 	"git.code.oa.com/trpc-go/trpc-go/client"
+	"git.code.oa.com/trpc-go/trpc-go/log"
 	"git.code.oa.com/video_app_short_video/trpc_go_commonlib/errs"
 
 	// 协议文件
@@ -19,14 +20,19 @@ import (
 )
 
 // getJCEOptions 获取jce调用客户端配置
-func getJCEOptions(ctx context.Context, cmd int, service string) []client.Option {
+func getJCEOptions(ctx context.Context, followConfig config.QueryFollowService) []client.Option {
 	// 调用jce服务，需要构造vp包头
 	videoPacket := videopacketHelper.GetVideoPacketCopy(ctx)
-	videoPacket.CommHeader.ServerRoute.ToServerName = service
-	videoPacket.CommHeader.BasicInfo.Command = int16(cmd)
+	videoPacket.CommHeader.ServerRoute.ToServerName = followConfig.Service
+	videoPacket.CommHeader.BasicInfo.Command = int16(followConfig.Cmd)
 	return []client.Option{
-		client.WithServiceName(service),
+		client.WithServiceName(followConfig.Service),
 		client.WithReqHead(&videoPacket),
+		client.WithProtocol("videopacket"),
+		client.WithNetwork("tcp4"),
+		client.WithTarget(followConfig.ReadServiceName),
+		client.WithNamespace(followConfig.ReadServiceNamespace),
+		client.WithDisableServiceRouter(),
 	}
 }
 
@@ -52,7 +58,8 @@ func PackUpRelRsp(rsp *cFollowInnerJce.QueryFollowVppsRsp,
 func GetIDListFollowRelHelper(ctx context.Context, inputParam *pb.GetRelationIDListReq,
 	outputParam *pb.GetRelationIDListRsp) error {
 	followConfig := config.GetConfig().UserQueryFollowService
-	opts := getJCEOptions(ctx, followConfig.Cmd, followConfig.Service)
+	log.Debugf("followConfig=[%+v]", followConfig)
+	opts := getJCEOptions(ctx, followConfig)
 	// set request param
 	vuid, err := strconv.Atoi(inputParam.EntityId)
 	if err != nil {
