@@ -48,7 +48,7 @@ func PackUpRelRsp(rsp *cFollowInnerJce.QueryFollowVppsRsp,
 	}
 }
 
-// GetIDListFollowRelHelper ...
+// GetIDListFollowRelHelper 拉关注业务关系链的逻辑
 func GetIDListFollowRelHelper(ctx context.Context, inputParam *pb.GetRelationIDListReq,
 	outputParam *pb.GetRelationIDListRsp) error {
 	followConfig := config.GetConfig().UserQueryFollowService

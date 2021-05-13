@@ -152,9 +152,23 @@ func TestGetIDList(t *testing.T) {
 						},
 					},
 				}, nil
+			} else if req.User.UserId == 2 {
+				return &cFollowInnerJce.QueryFollowVppsRsp{
+					Result:      -1,
+					HasNextPage: false,
+					PageContext: "",
+					VecVppIds: []cFollowInnerJce.User{
+						{
+							UserId: 123,
+						},
+						{
+							UserId: 234,
+						},
+					},
+				}, nil
 			}
-			return &cFollowInnerJce.QueryFollowVppsRsp{}, nil
-		})
+			return &cFollowInnerJce.QueryFollowVppsRsp{}, errs.New(1, "err_msg")
+		}).AnyTimes()
 
 	p3 := gomonkey.ApplyFunc(cFollowInnerJce.NewUgcFollowInnerServiceProxy,
 		func(name string) cFollowInnerJce.UgcFollowInnerServiceProxy {
@@ -292,6 +306,46 @@ func TestGetIDList(t *testing.T) {
 				outputParam: &pb.GetRelationIDListRsp{},
 			},
 			wantErr: false,
+		},
+
+		{
+			name: "AbnormalCaseFollow_rel",
+			args: args{
+				ctx: context.Background(),
+				inputParam: &pb.GetRelationIDListReq{
+					EntityId: "2",
+					PageInfo: &pb.RelationIDListPageInfo{
+						Offset:   0,
+						PageSize: 100,
+						PageContext: map[string]string{
+							"page_context": "",
+						},
+					},
+					Scene: "follow_rel",
+				},
+				outputParam: &pb.GetRelationIDListRsp{},
+			},
+			wantErr: true,
+		},
+
+		{
+			name: "AbnormalCaseFollow_rel2",
+			args: args{
+				ctx: context.Background(),
+				inputParam: &pb.GetRelationIDListReq{
+					EntityId: "3",
+					PageInfo: &pb.RelationIDListPageInfo{
+						Offset:   0,
+						PageSize: 100,
+						PageContext: map[string]string{
+							"page_context": "",
+						},
+					},
+					Scene: "follow_rel",
+				},
+				outputParam: &pb.GetRelationIDListRsp{},
+			},
+			wantErr: true,
 		},
 	}
 	for _, tt := range tests {
