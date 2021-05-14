@@ -4,6 +4,7 @@ import (
 	//内部包
 	"context"
 	"fmt"
+	"time"
 	"timeline_id_list/common/errorcode"
 	"timeline_id_list/config"
 
@@ -56,10 +57,12 @@ func GetIDListSubsFansHelper(ctx context.Context, inputParam *pb.GetRelationIDLi
 	}
 	_ = componenthead.SetComponentReqHead(ctx, componentHead)
 
-	proxy := relationship_read.NewUserRelationShipReadClientProxy(client.WithProtocol("trpc"),
+	proxy := relationship_read.NewUserRelationShipReadClientProxy(
+		client.WithProtocol("trpc"),
 		client.WithNetwork("tcp4"),
 		client.WithTarget(userRelationshipConfig.ReadServiceName),
 		client.WithNamespace(userRelationshipConfig.ReadServiceNamespace),
+		client.WithTimeout(time.Duration(userRelationshipConfig.Timeout)*time.Millisecond),
 		client.WithDisableServiceRouter())
 	req := &relationship_read.GetFansListReq{
 		Id:                inputParam.EntityId,          // 请求用的vcuid

@@ -4,6 +4,7 @@ import (
 	//内部包
 	"context"
 	"fmt"
+	"time"
 	"timeline_id_list/common/errorcode"
 	"timeline_id_list/config"
 
@@ -61,6 +62,7 @@ func GetIDListSubsRelHelper(ctx context.Context, inputParam *pb.GetRelationIDLis
 		client.WithNetwork("tcp4"),
 		client.WithTarget(userRelationshipConfig.ReadServiceName),
 		client.WithNamespace(userRelationshipConfig.ReadServiceNamespace),
+		client.WithTimeout(time.Duration(userRelationshipConfig.Timeout)*time.Millisecond),
 		client.WithDisableServiceRouter())
 	req := &relationship_read.GetFollowListReq{
 		Id:                inputParam.EntityId,

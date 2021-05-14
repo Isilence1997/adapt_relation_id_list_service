@@ -19,4 +19,12 @@ const (
 	ParseVuidError = -8820014
 	// QueryFollowVppsError 调用QueryFollowVpps失败
 	QueryFollowVppsError = -8820015
+	// CallQueryFansListIdxCountError 调用QueryFansListIdxCount失败
+	CallQueryFansListIdxCountError = -8820016
+	// ParseIndexError 解析Index失败
+	ParseIndexError = -8820017
+	// ParseIdxCntError 解析vuid失败
+	ParseIdxCntError = -8820018
+	// CallQueryFansListError 调用QueryFansList失败
+	CallQueryFansListError = -8820019
 )

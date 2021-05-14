@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"strconv"
+	"time"
 	"timeline_id_list/common/errorcode"
 	"timeline_id_list/config"
 
@@ -32,6 +33,7 @@ func getJCEOptions(ctx context.Context, followConfig config.QueryFollowService) 
 		client.WithNetwork("tcp4"),
 		client.WithTarget(followConfig.ReadServiceName),
 		client.WithNamespace(followConfig.ReadServiceNamespace),
+		client.WithTimeout(time.Duration(followConfig.Timeout) * time.Millisecond),
 		client.WithDisableServiceRouter(),
 	}
 }

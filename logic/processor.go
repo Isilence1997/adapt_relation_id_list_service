@@ -27,6 +27,8 @@ func GetIDList(ctx context.Context, inputParam *pb.GetRelationIDListReq,
 		return subs.GetIDListSubsFansHelper(ctx, inputParam, outputParam)
 	case config.BizScene.FollowRelScene:
 		return follow.GetIDListFollowRelHelper(ctx, inputParam, outputParam)
+	case config.BizScene.FollowFansScene:
+		return follow.GetIDListFollowFansHelper(ctx, inputParam, outputParam)
 	default:
 		return errs.New(errorcode.UnknownParamError, "UnknownParamError")
 	}

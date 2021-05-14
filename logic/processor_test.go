@@ -3,6 +3,7 @@ package logic
 import (
 	"context"
 	"testing"
+	"timeline_id_list/common/errorcode"
 	"timeline_id_list/config"
 
 	"git.code.oa.com/trpc-go/trpc-go/client"
@@ -10,6 +11,7 @@ import (
 	relationship_read "git.code.oa.com/trpcprotocol/component_plat/account_service_user_relationship_read"
 	"git.code.oa.com/trpcprotocol/component_plat/common_comm"
 	pb "git.code.oa.com/trpcprotocol/component_plat/video_timeline_timeline_id_list"
+	followRead "git.code.oa.com/trpcprotocol/video_app_short_video/trpc_follow_read"
 	cFollowInnerJce "git.code.oa.com/video_app_short_video/short_video_trpc_proto/ugc_follow_inner"
 	cFollowInnerJceMock "git.code.oa.com/video_app_short_video/short_video_trpc_proto/ugc_follow_inner/mock_proxy"
 	"git.code.oa.com/vlib/go/video_common_api/componenthead"
@@ -175,6 +177,72 @@ func TestGetIDList(t *testing.T) {
 			return UgcFollowInnerMock
 		})
 	defer p3.Reset()
+
+	// mock RPC Call
+	mockctrl := gomock.NewController(t)
+	defer mockctrl.Finish()
+	followReadMock := followRead.NewMockFollowReadClientProxy(mockctrl)
+	followReadMock.EXPECT().QueryFansListIdxCount(context.Background(), gomock.Any()).DoAndReturn(
+		func(ctx context.Context, req *followRead.QueryFansIdxCountRequest) (
+			*followRead.QueryFansIdxCountResponse, error) {
+			if req.Vuid == 1234567 {
+				return &followRead.QueryFansIdxCountResponse{
+					ErrCode:  0,
+					ErrMsg:   "Success",
+					IdxCount: 5,
+				}, nil
+			} else if req.Vuid == 7654321 {
+				return &followRead.QueryFansIdxCountResponse{
+					ErrCode:  1000,
+					ErrMsg:   "ErrMsg",
+					IdxCount: 5,
+				}, nil
+			} else if req.Vuid == 76543210 {
+				return &followRead.QueryFansIdxCountResponse{
+					ErrCode:  1000,
+					ErrMsg:   "ErrMsg",
+					IdxCount: 5,
+				}, errs.New(errorcode.CallQueryFansListIdxCountError, "Error")
+			} else if req.Vuid == 12345678 || req.Vuid == 123456789 {
+				return &followRead.QueryFansIdxCountResponse{
+					ErrCode:  0,
+					ErrMsg:   "Success",
+					IdxCount: 1,
+				}, nil
+			}
+			return &followRead.QueryFansIdxCountResponse{}, nil
+		}).AnyTimes()
+
+	followReadMock.EXPECT().QueryFansList(context.Background(), gomock.Any()).DoAndReturn(
+		func(ctx context.Context, req *followRead.QueryFansListRequest) (
+			*followRead.QueryFansListResponse, error) {
+			if req.Vuid == 1234567 && req.Idx >= 1 && req.Idx <= 5 {
+				return &followRead.QueryFansListResponse{
+					ErrCode:   0,
+					ErrMsg:    "",
+					FansVuids: []int64{1},
+				}, nil
+			} else if req.Vuid == 12345678 {
+				return &followRead.QueryFansListResponse{
+					ErrCode:   0,
+					ErrMsg:    "",
+					FansVuids: []int64{1},
+				}, errs.New(errorcode.CallQueryFansListError, "Error")
+			} else if req.Vuid == 123456789 {
+				return &followRead.QueryFansListResponse{
+					ErrCode:   1000,
+					ErrMsg:    "",
+					FansVuids: []int64{1},
+				}, nil
+			}
+			return &followRead.QueryFansListResponse{}, nil
+		}).AnyTimes()
+
+	p4 := gomonkey.ApplyFunc(followRead.NewFollowReadClientProxy,
+		func(opt ...client.Option) followRead.FollowReadClientProxy {
+			return followReadMock
+		})
+	defer p4.Reset()
 
 	type args struct {
 		ctx         context.Context
@@ -342,6 +410,73 @@ func TestGetIDList(t *testing.T) {
 						},
 					},
 					Scene: "follow_rel",
+				},
+				outputParam: &pb.GetRelationIDListRsp{},
+			},
+			wantErr: true,
+		},
+
+		{
+			name: "NormalCaseFollow_fans",
+			args: args{
+				ctx: context.Background(),
+				inputParam: &pb.GetRelationIDListReq{
+					EntityId: "1234567",
+					PageInfo: &pb.RelationIDListPageInfo{
+						PageContext: map[string]string{},
+					},
+					Scene: "follow_fans",
+				},
+				outputParam: &pb.GetRelationIDListRsp{},
+			},
+			wantErr: false,
+		},
+
+		{
+			name: "NormalCaseFollow_fans1",
+			args: args{
+				ctx: context.Background(),
+				inputParam: &pb.GetRelationIDListReq{
+					EntityId: "1234567",
+					PageInfo: &pb.RelationIDListPageInfo{
+						PageContext: map[string]string{
+							"index":    "2",
+							"idxCount": "2",
+						},
+					},
+					Scene: "follow_fans",
+				},
+				outputParam: &pb.GetRelationIDListRsp{},
+			},
+			wantErr: false,
+		},
+
+		{
+			name: "AbnormalCaseFollow_fans",
+			args: args{
+				ctx: context.Background(),
+				inputParam: &pb.GetRelationIDListReq{
+					EntityId: "7654321",
+					PageInfo: &pb.RelationIDListPageInfo{
+						PageContext: map[string]string{},
+					},
+					Scene: "follow_fans",
+				},
+				outputParam: &pb.GetRelationIDListRsp{},
+			},
+			wantErr: true,
+		},
+
+		{
+			name: "AbnormalCaseFollow_fans1",
+			args: args{
+				ctx: context.Background(),
+				inputParam: &pb.GetRelationIDListReq{
+					EntityId: "76543210",
+					PageInfo: &pb.RelationIDListPageInfo{
+						PageContext: map[string]string{},
+					},
+					Scene: "follow_fans",
 				},
 				outputParam: &pb.GetRelationIDListRsp{},
 			},
