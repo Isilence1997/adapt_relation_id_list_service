@@ -16,6 +16,7 @@ import (
 	_ "git.code.oa.com/trpc-go/trpc-selector-cl5"
 	"git.code.oa.com/video_app_short_video/trpc_go_commonlib/atta-report"
 
+	_ "git.code.oa.com/trpc-go/trpc-codec/videopacket"
 	"git.code.oa.com/trpc-go/trpc-go/log"
 
 	trpc "git.code.oa.com/trpc-go/trpc-go"

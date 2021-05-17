@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
-	"timeline_id_list/common"
+	"timeline_id_list/common/errorcode"
 	"timeline_id_list/logic"
 
 	"git.code.oa.com/trpc-go/trpc-go/errs"
@@ -19,18 +19,18 @@ func (s *iDListServiceServiceImpl) GetRelationIDList(ctx context.Context,
 	log.Debugf("req[%+v]", req)
 	if req == nil || rsp == nil {
 		errStr := fmt.Sprintf("GetRelationIDList req=[%+v] or rsp=[%+v] is nil", req, rsp)
-		err := errs.New(common.ParamsInvalidError, errStr)
+		err := errs.New(errorcode.ParamsInvalidError, errStr)
 		log.Error(err)
-		atta.AttaLogTrpcCtxWithVuid(ctx, fmt.Sprintf("GetRelationIDList req=[%+v] or rsp=[%+v] is nil", req, rsp),
-			"GetRelationIDList failed", req.EntityId)
+		atta.AttaLogTrpcCtx(ctx, fmt.Sprintf("GetRelationIDList req=[%+v] or rsp=[%+v] is nil", req, rsp),
+			"GetRelationIDList failed")
 		return err
 	}
 	// 检查入参数是否合法
 	if req.EntityId == "" {
-		errStr := fmt.Sprintf("GetRelationIDList with empty req vuid, req=[%+v], rsp=[%+v]", req, rsp)
-		err := errs.New(common.EmptyInputIDError, errStr)
+		errStr := fmt.Sprintf("GetRelationIDList with empty user_id, req=[%+v], rsp=[%+v]", req, rsp)
+		err := errs.New(errorcode.EmptyInputIDError, errStr)
 		log.Error(err)
-		atta.AttaLogTrpcCtxWithVuid(ctx, fmt.Sprintf("GetRelationIDList with empty req vuid, req=[%+v], rsp=[%+v]",
+		atta.AttaLogTrpcCtxWithVuid(ctx, fmt.Sprintf("GetRelationIDList with empty user_id, req=[%+v], rsp=[%+v]",
 			req, rsp), "GetRelationIDList failed", req.EntityId)
 		return err
 	}

@@ -12,13 +12,34 @@ var (
 
 // 账号中台服务路由配置
 type RelationshipService struct {
-	ReadServiceName       string `json:"read_service_name" yaml:"read_service_name"`
-	ReadServiceNamespace  string `json:"read_service_namespace" yaml:"read_service_namespace"`
+	ReadServiceName      string `json:"read_service_name" yaml:"read_service_name"`
+	ReadServiceNamespace string `json:"read_service_namespace" yaml:"read_service_namespace"`
+	AppID                string `json:"app_id" yaml:"app_id"`
+	AppKey               string `json:"app_key" yaml:"app_key"`
+	Timeout              int    `json:"timeout" yaml:"timeout"`
+}
+
+// 账号中台服务路由配置
+type QueryFollowService struct {
+	ReadServiceName      string `json:"read_service_name" yaml:"read_service_name"`
+	ReadServiceNamespace string `json:"read_service_namespace" yaml:"read_service_namespace"`
+	Service              string `json:"service" yaml:"service"`
+	Cmd                  int    `json:"cmd" yaml:"cmd"`
+	Timeout              int    `json:"timeout" yaml:"timeout"`
+}
+
+// 账号中台服务路由配置
+type FansService struct {
+	ReadServiceName      string `json:"read_service_name" yaml:"read_service_name"`
+	ReadServiceNamespace string `json:"read_service_namespace" yaml:"read_service_namespace"`
+	Timeout              int    `json:"timeout" yaml:"timeout"`
 }
 
 // ServiceConfig 配置信息
 type ServiceConfig struct {
-	UserRelationshipService  RelationshipService `json:"user_relationship_service" yaml:"user_relationship_service"`
+	UserRelationshipService RelationshipService `json:"user_relationship_service" yaml:"user_relationship_service"`
+	UserQueryFollowService  QueryFollowService  `json:"user_query_follow_service" yaml:"user_query_follow_service"`
+	UserFansService         FansService         `json:"user_fans_service" yaml:"user_fans_service"`
 	// BizScene 业务场景配置
 	BizScene struct {
 		SubsRelScene    string `json:"subs_rel_scene" yaml:"subs_rel_scene"`
