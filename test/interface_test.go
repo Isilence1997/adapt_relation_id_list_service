@@ -55,7 +55,7 @@ func TestInterfaceCaseSubsRel(t *testing.T) {
 		EntityId: "161425204",
 		Scene:    "subs_rel",
 		PageInfo: &pb.RelationIDListPageInfo{
-			Offset: 0,
+			Offset:   0,
 			PageSize: 5,
 		},
 	}
@@ -78,7 +78,6 @@ func TestInterfaceCaseSubsRel(t *testing.T) {
 		}
 	}
 }
-
 
 func TestInterfaceCaseSubsFans(t *testing.T) {
 	t.Logf("%+v", trpc.GlobalConfig())
@@ -100,7 +99,7 @@ func TestInterfaceCaseSubsFans(t *testing.T) {
 		EntityId: "9000026631",
 		Scene:    "subs_fans",
 		PageInfo: &pb.RelationIDListPageInfo{
-			Offset: 0,
+			Offset:   0,
 			PageSize: 5,
 		},
 	}
@@ -124,7 +123,6 @@ func TestInterfaceCaseSubsFans(t *testing.T) {
 	}
 }
 
-
 func TestInterfaceCaseFollowRel(t *testing.T) {
 	t.Logf("%+v", trpc.GlobalConfig())
 	testing.Init()
@@ -145,7 +143,7 @@ func TestInterfaceCaseFollowRel(t *testing.T) {
 		EntityId: "2184715911",
 		Scene:    "follow_rel",
 		PageInfo: &pb.RelationIDListPageInfo{
-			Offset: 0,
+			Offset:   0,
 			PageSize: 5,
 		},
 	}
@@ -211,4 +209,3 @@ func TestInterfaceCaseFollowFans(t *testing.T) {
 		}
 	}
 }
-·
