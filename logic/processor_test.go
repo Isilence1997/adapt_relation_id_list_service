@@ -482,6 +482,19 @@ func TestGetIDList(t *testing.T) {
 			},
 			wantErr: true,
 		},
+
+		{
+			name: "NormalCaseFollow_fans",
+			args: args{
+				ctx: context.Background(),
+				inputParam: &pb.GetRelationIDListReq{
+					EntityId: "1234567",
+					Scene:    "follow_fans",
+				},
+				outputParam: &pb.GetRelationIDListRsp{},
+			},
+			wantErr: false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

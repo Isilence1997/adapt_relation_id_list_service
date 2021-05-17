@@ -102,6 +102,9 @@ func GetIDListFollowFansHelper(ctx context.Context, inputParam *pb.GetRelationID
 	var idxCount int32
 	var err1 error
 	// pageInfo 有可能为nil
+	if inputParam.PageInfo == nil {
+		inputParam.PageInfo = &pb.RelationIDListPageInfo{}
+	}
 	val, ok := inputParam.GetPageInfo().PageContext["idxCount"]
 	if !ok {
 		idxCount, err1 = GetFollowerIndexHelper(ctx, proxy, inputParam)
