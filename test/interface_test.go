@@ -184,7 +184,7 @@ func TestInterfaceCaseFollowFans(t *testing.T) {
 
 	proxy := pb.NewIDListServiceClientProxy(option...)
 	req := &pb.GetRelationIDListReq{
-		EntityId: "2358495800",
+		EntityId: "536164684",
 		Scene:    "follow_fans",
 		PageInfo: &pb.RelationIDListPageInfo{
 			PageContext: map[string]string{},
