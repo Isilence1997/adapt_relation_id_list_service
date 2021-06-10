@@ -1,3 +1,4 @@
+// Package 接口测试
 package interface_test
 
 import (
