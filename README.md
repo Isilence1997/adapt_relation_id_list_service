@@ -1,7 +1,5 @@
 # 标题
 
-[![BK Pipelines Status](https://api.bkdevops.qq.com/process/api/external/pipelines/projects/tencentvideocicd/p-f730ea6cfbf6437bb3f988a1ec7c99de/badge?X-DEVOPS-PROJECT-ID=tencentvideocicd)](http://api.devops.oa.com/process/api-html/user/builds/projects/tencentvideocicd/pipelines/p-f730ea6cfbf6437bb3f988a1ec7c99de/latestFinished?X-DEVOPS-PROJECT-ID=tencentvideocicd)  [![VEPC Score](https://pbaccess.video.qq.com/trpc.vepc_tools.vepc_banner.http/score?vappid=70420569&vsecret=6db9bf8c97010b57dd401166223ccd57b8d009c257261d53&origin=1&path=video_app_short_video%2Fadapt_relation_id_list_service)](https://pbaccess.video.qq.com/trpc.vepc_tools.vepc_banner.http/detail?vappid=70420569&vsecret=6db9bf8c97010b57dd401166223ccd57b8d009c257261d53&origin=1&path=video_app_short_video%2Fadapt_relation_id_list_service)
-
 一行简单的描述。(短描述)
 
 ## 项目介绍     README
@@ -45,5 +43,4 @@
 
 假如你的项目参考或引用了其他项目资料，请列出来。
 
-- [视频后台研发手册](https://git.code.oa.com/videobase/videonavi)
 
