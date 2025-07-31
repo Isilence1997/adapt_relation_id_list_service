@@ -31,7 +31,6 @@ func initService() {
 type iDListServiceServiceImpl struct{}
 
 func main() {
-
 	s := trpc.NewServer()
 	initService()
 	pb.RegisterIDListServiceService(s, &iDListServiceServiceImpl{})

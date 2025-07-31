@@ -18,7 +18,6 @@ require (
 	git.code.oa.com/trpcprotocol/component_plat/common_comm v1.1.10
 	git.code.oa.com/trpcprotocol/component_plat/video_timeline_timeline_data v1.1.13
 	git.code.oa.com/trpcprotocol/component_plat/video_timeline_timeline_id_list v1.1.6
-	git.code.oa.com/trpcprotocol/component_plat/video_timeline_timeline_rpc v1.1.27 // indirect
 	git.code.oa.com/trpcprotocol/video_app_short_video/trpc_follow_read v1.1.5
 	git.code.oa.com/video_app_short_video/short_video_trpc_proto/ugc_follow_inner v0.0.0-20210511034114-6a333fab1e98
 	git.code.oa.com/video_app_short_video/trpc_go_commonlib v0.0.0-20210414121907-cb9ebeb71f16
